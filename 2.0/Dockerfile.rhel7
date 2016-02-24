@@ -18,9 +18,24 @@ LABEL com.redhat.component="openshift-sti-ruby-docker" \
       name="openshift3/ruby-20-rhel7" \
       version="2.0" \
       release="2" \
-      architecture="x86_64"
+      architecture="s390x"
 
-RUN INSTALL_PKGS="ruby200 ruby200-ruby-devel ruby200-rubygem-rake v8314 ror40-rubygem-bundler nodejs010" && \
+# Install nodejs
+# Install the build dependencies
+RUN yum install --nogpgcheck -y \
+        git \
+        java-1.8.0-openjdk \
+        gcc-c++ \
+        make
+
+# Clone the source code of Node.js from github
+RUN git clone https://github.com/andrewlow/node.git
+
+# Build and install Node.js
+RUN cd node/ && ./configure && make && make install
+
+
+RUN INSTALL_PKGS="ruby ruby-devel rubygem-rake rubygem-bundler" && \
   yum install -y --setopt=tsflags=nodocs  $INSTALL_PKGS && rpm -V $INSTALL_PKGS && \
     yum clean all -y
 
